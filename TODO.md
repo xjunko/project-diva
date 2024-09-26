@@ -1,14 +1,23 @@
 # PVDB
-[/] Read pv_db.txt 
+- [x] Read pv_db.txt 
 
 # DSC
-[/] Read .dsc script files
+- [x] Read .dsc script files
 
 # FARC
-[/] FArc FArC FARC decompression
-[/] FARC "encrypted+compressed" decompression
+- [x] FArc FArC FARC decompression
+- [x] FARC "encrypted+compressed" decompression
+
+# Sprites
+- [x] Implement SpriteSet
+- [x] Implement Sprite
+
+# Textures
+- [x] Implement TextureSet
+- [x] Implement Texture
+- [/] Implement SubTexture (broken)
 
 # AET
-[x] Sprite
-[x] Texture
-[x] Etc
+- [ ] Sprite
+- [ ] Texture
+- [ ] Etc
