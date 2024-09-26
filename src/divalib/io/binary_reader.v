@@ -1,12 +1,34 @@
 module io
 
 import os
+import math.bits
 import encoding.binary
 
 pub struct BinaryReader {
+mut:
+	offsets []int
 pub mut:
 	data     []u8
 	position int
+}
+
+// Moving
+pub fn (mut br BinaryReader) seek(amount int) {
+	br.position += amount
+}
+
+pub fn (mut br BinaryReader) to(position int) {
+	br.position = position
+}
+
+pub fn (mut br BinaryReader) push_offset() {
+	br.offsets << br.position
+}
+
+pub fn (mut br BinaryReader) pop_offset() {
+	if br.offsets.len > 0 {
+		br.position = br.offsets.pop()
+	}
 }
 
 // Reading Operations
@@ -29,6 +51,16 @@ pub fn (mut br BinaryReader) read_byte() u8 {
 pub enum BinaryReaderStringMethod {
 	null_terminated
 	length
+}
+
+pub fn (mut br BinaryReader) read_string_offset(method BinaryReaderStringMethod, optional_length ...int) string {
+	offset := br.read_u32(false)
+	mut current := br.position
+	br.position = offset
+	mut data := br.read_string(method, ...optional_length)
+	br.position = current
+
+	return data
 }
 
 pub fn (mut br BinaryReader) read_string(method BinaryReaderStringMethod, optional_length ...int) string {
@@ -94,6 +126,21 @@ pub fn (mut br BinaryReader) read_u64(big_endian bool) u64 {
 		return binary.big_endian_u64(data)
 	}
 	return binary.little_endian_u64(data)
+}
+
+// Unique types
+pub fn (mut br BinaryReader) read_single(big_endian bool) f32 {
+	return bits.f32_from_bits(br.read_u32(big_endian))
+}
+
+pub fn (mut br BinaryReader) read_singles(big_endian bool, amount int) []f32 {
+	mut data := []f32{}
+
+	for i := 0; i < amount; i++ {
+		data << br.read_single(big_endian)
+	}
+
+	return data
 }
 
 // Factory
