@@ -2,11 +2,11 @@ module farc
 
 import os
 import structs
-import utils
+import divalib.io
 
 pub fn read(path string) !&structs.IArchive {
 	mut raw_bytes := os.read_bytes(path)!
-	mut br := utils.BinaryReader.from_bytes(raw_bytes)
+	mut br := io.BinaryReader.from_bytes(raw_bytes)
 
 	header := br.read_string(.length, 4)
 	match header {

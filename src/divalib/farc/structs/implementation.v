@@ -4,7 +4,7 @@ import math
 import crypto.aes
 import crypto.cipher
 import compress.gzip
-import divalib.farc.utils
+import divalib.io
 import os
 
 // Headers
@@ -33,7 +33,7 @@ pub fn (fa FutureArchive) get_header() string {
 }
 
 // Extract
-pub fn (mut ba BasicArchive) read(mut br utils.BinaryReader) ! {
+pub fn (mut ba BasicArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 	alignment := br.read_u32(true)
 
@@ -60,7 +60,7 @@ pub fn (mut ba BasicArchive) read(mut br utils.BinaryReader) ! {
 	ba.align = alignment
 }
 
-pub fn (mut ca CompressedArchive) read(mut br utils.BinaryReader) ! {
+pub fn (mut ca CompressedArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 	alignment := br.read_u32(true)
 
@@ -113,7 +113,7 @@ pub fn (mut fa FutureArchive) create_aes_from_iv(iv []u8) FutureToneDecryptor {
 	return cbc_ft
 }
 
-pub fn (mut fa FutureArchive) read(mut br utils.BinaryReader) ! {
+pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 
 	flags := br.read_u32(true)
@@ -191,7 +191,7 @@ pub fn (mut fa FutureArchive) read(mut br utils.BinaryReader) ! {
 
 			// Decrypt entry
 			// Requires original data to decrypt
-			mut binary_file_reader := utils.BinaryReader.from_bytes(original_data)
+			mut binary_file_reader := io.BinaryReader.from_bytes(original_data)
 			mut data := []u8{}
 
 			if is_ft {

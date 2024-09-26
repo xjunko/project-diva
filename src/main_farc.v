@@ -2,7 +2,7 @@ module main
 
 import os
 import divalib.farc
-import divalib.farc.utils
+import divalib.io
 
 fn main() {
 	mut compressed_only := farc.read('assets/dev/gm_btn_se_tbl.farc')!
@@ -17,7 +17,7 @@ fn main() {
 	}
 
 	// AET Sprite Database ? Maybe
-	mut br := utils.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn_ref.bin')!
+	mut br := io.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn_ref.bin')!
 
 	println(br.read_u32(false)) // Signature
 	texture_offset := br.read_u32(false)
