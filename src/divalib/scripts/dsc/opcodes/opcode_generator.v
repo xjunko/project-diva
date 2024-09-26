@@ -433,7 +433,7 @@ pub const raw_opcodes = {
 	}
 }
 
-pub const op_code_translated_path = '${@VMODROOT}/dsc/opcodes/opcodes.v'
+pub const op_code_translated_path = '${@VMODROOT}/scripts/dsc/opcodes/opcodes.v'
 
 // Internal uses
 fn generate_opcode_based_on_dict_to_v_code() {

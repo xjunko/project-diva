@@ -1,7 +1,7 @@
 module pv
 
 import os
-import divalib.pv.structs
+import divalib.database.pv.structs
 
 pub struct DBParser {
 pub mut:
