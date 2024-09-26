@@ -15,7 +15,7 @@
 # Textures
 - [x] Implement TextureSet
 - [x] Implement Texture
-- [/] Implement SubTexture (broken)
+- [ ] Implement SubTexture (broken)
 
 # AET
 - [ ] Sprite
