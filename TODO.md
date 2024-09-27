@@ -15,7 +15,8 @@
 # Textures
 - [x] Implement TextureSet
 - [x] Implement Texture
-- [ ] Implement SubTexture (broken)
+- [x] Implement SubTexture
+- [ ] SubTexture Data Decoding (Currently stuck on DXT5 and ATI2)
 
 # AET
 - [ ] Sprite
