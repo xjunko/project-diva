@@ -12,6 +12,31 @@ pub mut:
 	position int
 }
 
+// Offset
+pub fn (mut br BinaryReader) get_base_offset() int {
+	if br.offsets.len == 0 {
+		return 0
+	}
+
+	return br.offsets[br.offsets.len - 1]
+}
+
+// Callbacks
+pub type BinaryReaderCallback = fn ()
+
+pub fn (mut br BinaryReader) read_offset_and(callback &BinaryReaderCallback) {
+	offset := br.read_u32(false)
+
+	if offset == 0 {
+		return
+	}
+
+	mut current := br.position
+	br.to(br.get_base_offset() + offset)
+	callback()
+	br.to(current)
+}
+
 // Moving
 pub fn (mut br BinaryReader) seek(amount int) {
 	br.position += amount
