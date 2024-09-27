@@ -12,6 +12,8 @@ pub mut:
 }
 
 pub fn (mut texture Texture) read(mut br io.BinaryReader) {
+	br.push_offset()
+
 	signature := br.read_u32(false)
 
 	if signature != 0x04505854 && signature != 0x05505854 {
@@ -42,21 +44,11 @@ pub fn (mut texture Texture) read(mut br io.BinaryReader) {
 
 	for i := 0; i < array_size; i++ {
 		for j := 0; j < mip_map_count; j++ {
-			offset := br.read_u32(false)
-
-			if offset == 0 || offset > br.data.len {
-				break
-			}
-
-			current := br.position
-
-			// This is a hack, I'm not sure if this works properly.
-			// It works with the file I'm using right now, but I'm sure it'll break easily.
-			// TODO
-			br.seek(offset - 16 - (j * 4))
-			/// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			texture.subtextures[i][j].read(mut br)
-			br.to(current)
+			br.read_offset_and(fn [mut br, mut texture, i, j] () {
+				texture.subtextures[i][j].read(mut br)
+			})
 		}
 	}
+
+	br.pop_offset()
 }
