@@ -17,10 +17,21 @@ fn main() {
 		os.write_file_array('assets/dev/raw/' + entry.name, entry.data)!
 	}
 
-	mut stream := io.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn.bin')!
+	mut stream := io.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn_ref.bin')!
 	mut sprite_set := sprites.SpriteSet.from_io(stream)
 	sprite_set.read()
 
-	println(sprite_set.sprites)
-	println(sprite_set.texture_set.textures)
+	for mut texture in sprite_set.texture_set.textures {
+		println('Texture: ${texture.name}')
+		println('Format: ${texture.subtextures[0][0].format}')
+		println('Compressed: ${texture.subtextures[0][0].format.is_compressed()}')
+
+		for mut subtexture_row in texture.subtextures {
+			for n, mut subtexture in subtexture_row {
+				subtexture.decode()
+				os.write_file_array('assets/dev/subtextures/' + texture.name + '_${n}.png',
+					subtexture.data)!
+			}
+		}
+	}
 }
