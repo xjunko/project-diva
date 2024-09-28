@@ -16,9 +16,10 @@
 - [x] Implement TextureSet
 - [x] Implement Texture
 - [x] Implement SubTexture
-- [x] SubTexture Data Decoding (Ongoing)
+- [x] SubTexture Data Decoding
 - [x] DXT
-- [ ] ATI
+- [x] ATI
+- [ ] Raw RGBA (Haven't encountered it yet.)
 
 # AET
 - [ ] Sprite
