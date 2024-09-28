@@ -4,6 +4,7 @@ import os
 import divalib.archives.farc
 import divalib.sprites
 import divalib.io
+import stbi
 
 fn main() {
 	mut compressed_only := farc.read('assets/dev/gm_btn_se_tbl.farc')!
@@ -26,11 +27,22 @@ fn main() {
 		println('Format: ${texture.subtextures[0][0].format}')
 		println('Compressed: ${texture.subtextures[0][0].format.is_compressed()}')
 
+		// We only support DXT5 right now
+		if texture.subtextures[0][0].format != .dxt5 {
+			continue
+		}
+
 		for mut subtexture_row in texture.subtextures {
 			for n, mut subtexture in subtexture_row {
-				subtexture.decode()
-				os.write_file_array('assets/dev/subtextures/' + texture.name + '_${n}.png',
-					subtexture.data)!
+				rgba_pixels, channel_count := subtexture.decode()
+
+				stbi.stbi_write_png('assets/dev/subtextures/' + texture.name +
+					'_${n}_${subtexture.width}_${subtexture.height}.png', subtexture.width,
+					subtexture.height, 4, rgba_pixels.data, subtexture.width * channel_count)!
+
+				unsafe {
+					rgba_pixels.free()
+				}
 			}
 		}
 	}
