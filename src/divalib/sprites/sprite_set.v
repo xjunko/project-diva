@@ -21,7 +21,7 @@ pub fn SpriteSet.from_io(stream &io.BinaryReader) &SpriteSet {
 }
 
 pub fn (mut sprite_set SpriteSet) read() {
-	signature := sprite_set.stream.read_u32(false)
+	_ := sprite_set.stream.read_u32(false) // signature
 	texture_offset := sprite_set.stream.read_u32(false)
 	texture_count := sprite_set.stream.read_u32(false)
 	sprite_count := sprite_set.stream.read_u32(false)

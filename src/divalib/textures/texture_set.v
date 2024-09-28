@@ -19,7 +19,7 @@ pub fn (mut texture_set TextureSet) read() {
 	}
 
 	texture_count := texture_set.stream.read_u32(false)
-	texture_count_with_rubbish := texture_set.stream.read_u32(false)
+	_ := texture_set.stream.read_u32(false) // texture_count_with_rubbish
 
 	for i := 0; i < texture_count; i++ {
 		mut texture := &Texture{}

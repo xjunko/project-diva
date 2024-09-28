@@ -37,12 +37,18 @@ pub fn (mut sub_texture SubTexture) decode() ([]u8, int) {
 	} else {
 		// This is the hard part
 		// This will be slowly implemented
-		// For now we only support DXT5
-		if sub_texture.format != .dxt5 {
+		// For now we only support DXT5, DXT1
+		if sub_texture.format != .dxt5 && sub_texture.format != .dxt1 {
 			panic('Unimplemeted Texture Format: ${sub_texture.format}')
 		}
 
 		match sub_texture.format {
+			.dxt1 {
+				mut rgba_pixels := []u8{len: int(sub_texture.width * sub_texture.height * 16)}
+				dxt.decompress_dxt1_to_rgba(sub_texture.width, sub_texture.height, sub_texture.data, mut
+					rgba_pixels)
+				return rgba_pixels, channel_count
+			}
 			.dxt5 {
 				mut rgba_pixels := []u8{len: int(sub_texture.width * sub_texture.height * 16)}
 				dxt.decompress_dxt5_to_rgba(sub_texture.width, sub_texture.height, sub_texture.data, mut
