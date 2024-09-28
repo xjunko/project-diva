@@ -18,7 +18,7 @@ fn main() {
 		os.write_file_array('assets/dev/raw/' + entry.name, entry.data)!
 	}
 
-	mut stream := io.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn_ref.bin')!
+	mut stream := io.BinaryReader.from_file('assets/dev/raw/spr_gam_cmn.bin')!
 	mut sprite_set := sprites.SpriteSet.from_io(stream)
 	sprite_set.read()
 
@@ -36,6 +36,7 @@ fn main() {
 			for n, mut subtexture in subtexture_row {
 				rgba_pixels, channel_count := subtexture.decode()
 
+				stbi.set_flip_vertically_on_write(true)
 				stbi.stbi_write_png('assets/dev/subtextures/' + texture.name +
 					'_${n}_${subtexture.width}_${subtexture.height}.png', subtexture.width,
 					subtexture.height, 4, rgba_pixels.data, subtexture.width * channel_count)!
