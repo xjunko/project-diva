@@ -1,7 +1,8 @@
 module textures
 
+import arrays
 import divalib.io
-import divalib.thirdparty.dxt
+import divalib.thirdparty.bcdec
 
 pub struct SubTexture {
 pub mut:
@@ -35,27 +36,40 @@ pub fn (mut sub_texture SubTexture) decode() ([]u8, int) {
 		// This should be easy, so I'm leaving it for later
 		panic('Unimplemented uncompressed texture format')
 	} else {
-		// This is the hard part
-		// This will be slowly implemented
-		// For now we only support DXT5, DXT1
-		if sub_texture.format != .dxt5 && sub_texture.format != .dxt1 {
-			panic('Unimplemeted Texture Format: ${sub_texture.format}')
-		}
-
 		match sub_texture.format {
 			.dxt1 {
-				mut rgba_pixels := []u8{len: int(sub_texture.width * sub_texture.height * 16)}
-				dxt.decompress_dxt1_to_rgba(sub_texture.width, sub_texture.height, sub_texture.data, mut
-					rgba_pixels)
+				mut rgba_pixels := bcdec.get_dxt1(sub_texture.data, sub_texture.width,
+					sub_texture.height)
+				channel_count = 4
+				return rgba_pixels, channel_count
+			}
+			.dxt3 {
+				mut rgba_pixels := bcdec.get_dxt3(sub_texture.data, sub_texture.width,
+					sub_texture.height)
+				channel_count = 4
 				return rgba_pixels, channel_count
 			}
 			.dxt5 {
-				mut rgba_pixels := []u8{len: int(sub_texture.width * sub_texture.height * 16)}
-				dxt.decompress_dxt5_to_rgba(sub_texture.width, sub_texture.height, sub_texture.data, mut
-					rgba_pixels)
+				mut rgba_pixels := bcdec.get_dxt5(sub_texture.data, sub_texture.width,
+					sub_texture.height)
+				channel_count = 4
 				return rgba_pixels, channel_count
 			}
-			else {}
+			.ati1 {
+				mut pixels := bcdec.get_ati1(sub_texture.data, sub_texture.width, sub_texture.height)
+				channel_count = 1
+
+				panic("This is WIP, I haven't tested it yet")
+				return pixels, channel_count
+			}
+			.ati2 {
+				mut pixels := bcdec.get_ati2(sub_texture.data, sub_texture.width, sub_texture.height)
+				channel_count = 1
+				return pixels, channel_count
+			}
+			else {
+				panic('Unsupported texture format: ${sub_texture.format}')
+			}
 		}
 	}
 
