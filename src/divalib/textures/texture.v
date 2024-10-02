@@ -11,6 +11,18 @@ pub mut:
 	subtextures [][]&SubTexture
 }
 
+pub fn (texture &Texture) free() {
+	unsafe {
+		texture.size.free()
+
+		for i := 0; i < texture.subtextures.len; i++ {
+			for j := 0; j < texture.subtextures[i].len; j++ {
+				texture.subtextures[i][j].free()
+			}
+		}
+	}
+}
+
 pub fn (mut texture Texture) read(mut br io.BinaryReader) {
 	br.push_offset()
 

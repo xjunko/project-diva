@@ -12,6 +12,11 @@ pub mut:
 	data   []u8
 }
 
+pub fn (sub_texture &SubTexture) free() {
+	// Nothing to free, because data is just a reference to binaryreader upstream.
+	// Those will get freed instead.
+}
+
 pub fn (mut sub_texture SubTexture) read(mut br io.BinaryReader) {
 	signature := br.read_u32(false)
 

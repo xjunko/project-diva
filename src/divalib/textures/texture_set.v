@@ -9,6 +9,14 @@ pub mut:
 	textures []&Texture
 }
 
+pub fn (texture_set &TextureSet) free() {
+	unsafe {
+		for i := 0; i < texture_set.textures.len; i++ {
+			texture_set.textures[i].free()
+		}
+	}
+}
+
 pub fn (mut texture_set TextureSet) read() {
 	texture_set.stream.push_offset()
 
