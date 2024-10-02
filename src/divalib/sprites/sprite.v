@@ -35,6 +35,15 @@ pub mut:
 	size          []f32
 }
 
+pub fn (sprite &Sprite) free() {
+	unsafe {
+		sprite.rect_begin.free()
+		sprite.rect_end.free()
+		sprite.position.free()
+		sprite.size.free()
+	}
+}
+
 pub fn (mut sprite Sprite) read(mut br io.BinaryReader) {
 	sprite.texture_index = br.read_u32(false)
 	br.seek(4)

@@ -11,6 +11,17 @@ pub mut:
 	texture_set &textures.TextureSet
 }
 
+pub fn (sprite_set &SpriteSet) free() {
+	unsafe {
+		for i := 0; i < sprite_set.sprites.len; i++ {
+			sprite_set.sprites[i].free()
+		}
+
+		sprite_set.texture_set.free()
+		sprite_set.stream.free()
+	}
+}
+
 pub fn SpriteSet.from_io(stream &io.BinaryReader) &SpriteSet {
 	mut ss := &SpriteSet{
 		stream:      unsafe { stream }
