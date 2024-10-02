@@ -8,6 +8,10 @@ import divalib.textures
 import stbi
 
 fn main() {
+	// vgmstream-wrapper
+	mut sfx_test := io.VAGReader.from_file('assets/dev/sfx/se_ft_common_01.vag')
+	sfx_test.read()!
+
 	// Audio SFX (vag format)
 	mut sfx_archive := farc.read('assets/dev/se_ft.farc')!
 
