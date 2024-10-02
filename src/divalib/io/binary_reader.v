@@ -12,6 +12,14 @@ pub mut:
 	position int
 }
 
+// Free
+pub fn (br &BinaryReader) free() {
+	unsafe {
+		br.offsets.free()
+		br.data.free()
+	}
+}
+
 // Offset
 pub fn (mut br BinaryReader) get_base_offset() int {
 	if br.offsets.len == 0 {
