@@ -117,7 +117,7 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 
 	flags := br.read_u32(true)
-	_ := (flags & 2) != 0 // IsCompressed
+	is_compressed := (flags & 2) != 0 // IsCompressed
 	is_encrypted := (flags & 4) != 0
 
 	mut padding := br.read_u32(true) // Padding
@@ -163,11 +163,11 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 
 			mut fixed_size := u32(0)
 
-			if entry_is_encrypted {
-				if entry_is_compressed {
+			if is_encrypted {
+				if is_compressed {
 					fixed_size = (compressed_size + (alignment - 1)) & ~(alignment - 1)
 				}
-			} else if entry_is_compressed {
+			} else if is_compressed {
 				fixed_size = compressed_size
 			} else {
 				fixed_size = decompressed_size
@@ -200,6 +200,13 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 
 				if entry_is_compressed {
 					data = gzip.decompress(data, verify_length: false, verify_checksum: false)!
+				}
+			}
+
+			// Data is over the decompressed size
+			if data.len > decompressed_size {
+				unsafe {
+					data = data[..decompressed_size]
 				}
 			}
 
