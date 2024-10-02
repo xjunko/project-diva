@@ -8,6 +8,14 @@ import divalib.textures
 import stbi
 
 fn main() {
+	// Audio SFX (vag format)
+	mut sfx_archive := farc.read('assets/dev/se_ft.farc')!
+
+	for file in sfx_archive.entries {
+		os.write_file_array('assets/dev/sfx/' + file.name, file.data)!
+	}
+
+	// Sprites (bc formats)
 	mut compressed_encrypted := farc.read('assets/dev/spr_gam_cmn.farc')!
 
 	for entry in compressed_encrypted.entries {
@@ -44,4 +52,6 @@ fn main() {
 			}
 		}
 	}
+
+	for {}
 }
