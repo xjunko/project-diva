@@ -21,6 +21,9 @@
 - [x] ATI
 - [ ] Raw RGBA (Haven't encountered it yet.)
 
+# Audio
+- [x] .vag Audio File
+
 # AET
 - [ ] Sprite
 - [ ] Texture
