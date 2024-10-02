@@ -1,5 +1,7 @@
 module structs
 
+import divalib.io
+
 pub struct ArchiveEntry {
 pub mut:
 	name              string
@@ -17,6 +19,7 @@ pub struct BasicArchive {
 pub mut:
 	align   u32
 	entries []ArchiveEntry
+	stream  &io.BinaryReader
 }
 
 pub struct CompressedArchive {
@@ -33,4 +36,5 @@ mut:
 	entries []ArchiveEntry
 
 	get_header() string
+	free()
 }
