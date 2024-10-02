@@ -12,8 +12,11 @@ fn main() {
 	mut sfx_archive := farc.read('assets/dev/se_ft.farc')!
 
 	for file in sfx_archive.entries {
+		println('[SFX] Extracting ${file.name}')
 		os.write_file_array('assets/dev/sfx/' + file.name, file.data)!
+		file.free()
 	}
+	sfx_archive.free()
 
 	// Sprites (bc formats)
 	mut compressed_encrypted := farc.read('assets/dev/spr_gam_cmn.farc')!
@@ -51,7 +54,11 @@ fn main() {
 				}
 			}
 		}
+
+		sprite_set.free()
 	}
+
+	compressed_encrypted.free()
 
 	for {}
 }
