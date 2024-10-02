@@ -15,6 +15,10 @@ To be able to play the game natively on any system (that is supported by V).
 # State of the Project
 [[> Refer to the TODO](TODO.md)]
 
+# Disclaimer [Windows only]
+The BinaryReader in Windows, for whatever reason, works much worse than it is on *nix. Not sure why that is. <br>
+Linux will be the main target of this project.
+
 # Acknowledgement
 - [MikuMikuLibrary](https://github.com/blueskythlikesclouds/MikuMikuLibrary) is what this project are mostly based on.
 - [farc-rust](https://github.com/diva-rust-modding/farc), somewhat barebone version of the farc, but enough to give me clues on how the archive file works.
