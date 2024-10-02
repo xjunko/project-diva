@@ -22,7 +22,8 @@
 - [ ] Raw RGBA (Haven't encountered it yet.)
 
 # Audio
-- [x] .vag Audio File
+- [x] .vag Audio File (Requires the file itself to be saved first before converting, a limitation of the cli)
+- [ ] Read in-memory
 
 # AET
 - [ ] Sprite
