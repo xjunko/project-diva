@@ -28,7 +28,6 @@ pub fn (mut vag VAGReader) read() ! {
 
 	// Read data
 	for {
-		println('123')
 		str_data := reader.stdout_read()
 		vag.data << str_data.bytes()
 
