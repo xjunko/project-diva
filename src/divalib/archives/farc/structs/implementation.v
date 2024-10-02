@@ -117,10 +117,10 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 
 	flags := br.read_u32(true)
-	is_compressed := (flags & 2) != 0
+	_ := (flags & 2) != 0 // IsCompressed
 	is_encrypted := (flags & 4) != 0
 
-	mut padding := br.read_u32(true)
+	mut padding := br.read_u32(true) // Padding
 	mut alignment := br.read_u32(true)
 	mut is_ft := is_encrypted && (alignment & (alignment - 1)) != 0
 
@@ -140,18 +140,11 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 		alignment = br.read_u32(true)
 		is_ft = br.read_u32(true) != 0
 
-		entry_count := br.read_u32(true)
+		mut entry_count := br.read_u32(true)
 
 		if is_ft {
 			padding = br.read_u32(true)
 		}
-
-		println('Entry Count: ${entry_count}')
-		println('Padding: ${padding}')
-		println('Alignment: ${alignment}')
-		println('Is FT: ${is_ft}')
-		println('IsCompressed: ${is_compressed}')
-		println('IsEncrypted: ${is_encrypted}')
 
 		for (br.position < header_size + 0x08) {
 			name := br.read_string(.null_terminated)
@@ -224,6 +217,14 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 				is_encrypted:      entry_is_encrypted
 				is_future_tone:    is_ft
 				data:              data
+			}
+
+			// Check for extra padding, esp with AFT files.
+			// Padding check is there to silence the warning.
+			entry_count--
+
+			if (is_ft && entry_count == 0) || padding == 0xF00BA {
+				break
 			}
 		}
 	}
