@@ -69,7 +69,7 @@ pub fn (mut sub_texture SubTexture) decode() ([]u8, int) {
 			}
 			.ati2 {
 				mut pixels := bcdec.get_ati2(sub_texture.data, sub_texture.width, sub_texture.height)
-				channel_count = 1
+				channel_count = 2
 				return pixels, channel_count
 			}
 			else {

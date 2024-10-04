@@ -35,5 +35,5 @@ pub fn get_ati1(src []u8, width int, height int) []u8 {
 
 pub fn get_ati2(src []u8, width int, height int) []u8 {
 	mut c_array := C.jnko_ati2(src.data, width, height)
-	return unsafe { arrays.carray_to_varray[u8](c_array, (width * height)) }
+	return unsafe { arrays.carray_to_varray[u8](c_array, (width * height * 2)) }
 }
