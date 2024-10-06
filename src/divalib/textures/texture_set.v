@@ -29,6 +29,8 @@ pub fn (mut texture_set TextureSet) read() {
 	texture_count := texture_set.stream.read_u32(false)
 	_ := texture_set.stream.read_u32(false) // texture_count_with_rubbish
 
+	texture_set.textures = []&Texture{len: int(texture_count), init: unsafe { nil }}
+
 	for i := 0; i < texture_count; i++ {
 		mut texture := &Texture{}
 
@@ -36,7 +38,7 @@ pub fn (mut texture_set TextureSet) read() {
 			texture.read(mut texture_set.stream)
 		})
 
-		texture_set.textures << texture
+		texture_set.textures[i] = texture
 	}
 
 	texture_set.stream.pop_offset()
