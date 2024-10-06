@@ -17,7 +17,7 @@ To be able to play the game natively on any system (that is supported by V).
 
 # Disclaimer [Windows only]
 The BinaryReader in Windows, for whatever reason, works much worse than it is on *nix. Not sure why that is. <br>
-Linux will be the main target of this project.
+Linux will be the main target of this project, until I figured that out.
 
 # Acknowledgement
 - [MikuMikuLibrary](https://github.com/blueskythlikesclouds/MikuMikuLibrary) is what this project are mostly based on.
