@@ -18,14 +18,21 @@
 - [x] Implement SubTexture
 - [x] SubTexture Data Decoding
 - [x] DXT
-- [x] ATI
+- [x] ATI1
+- [x] ATI2 (BC5) YCbCr decoding
 - [ ] Raw RGBA (Haven't encountered it yet.)
 
 # Audio
 - [x] .vag Audio File (Requires the file itself to be saved first before converting, a limitation of the cli)
-- [ ] Read in-memory
+- [x] Read in-memory, scuffed workaround for now [Save to /tmp/].
 
 # AET
 - [ ] Sprite
 - [ ] Texture
 - [ ] Etc
+
+# Gameplay 
+- [ ] Load .dsc 
+- [ ] Play .dsc
+- [ ] 2D Overlays
+- [ ] 3D Background
