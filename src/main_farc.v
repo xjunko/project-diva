@@ -50,10 +50,6 @@ fn main() {
 			println('Format: ${texture.subtextures[0][0].format}')
 			println('Compressed: ${texture.subtextures[0][0].format.is_compressed()}')
 
-			if texture.name != 'MERGE_BC5COMP_1' {
-				continue
-			}
-
 			for mut subtexture_row in texture.subtextures {
 				mut lum_texture := subtexture_row[0]
 				mut chr_texture := subtexture_row[1]
@@ -61,35 +57,17 @@ fn main() {
 				lum_pixels, lum_channel_count := lum_texture.decode()
 				chr_pixels, chr_channel_count := chr_texture.decode()
 
-				stbi.stbi_write_png('lum.png', lum_texture.width, lum_texture.height,
-					lum_channel_count, lum_pixels.data, lum_texture.width * lum_channel_count)!
-				stbi.stbi_write_png('chr.png', chr_texture.width, chr_texture.height,
-					chr_channel_count, chr_pixels.data, chr_texture.width * chr_channel_count)!
-
 				final_pixels := bcdec.get_ati2_ycbcr(lum_pixels, chr_pixels, lum_texture.width,
 					lum_texture.height, lum_channel_count, chr_channel_count)
 
 				stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name + '.tga',
 					lum_texture.width, lum_texture.height, 4, final_pixels.data)!
 
-				exit(1)
-
-				// for n, mut subtexture in subtexture_row {
-				// 	pixels, channel_count := subtexture.decode()
-
-				// 	println('Subtexture: ${n}')
-				// 	println('Width: ${subtexture.width}')
-				// 	println('Height: ${subtexture.height}')
-
-				// 	stbi.set_flip_vertically_on_write(true)
-				// 	stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name +
-				// 		'_${n}_${subtexture.width}_${subtexture.height}_${subtexture.format.str()}.tga',
-				// 		subtexture.width, subtexture.height, channel_count, pixels.data)!
-
-				// 	unsafe {
-				// 		pixels.free()
-				// 	}
-				// }
+				unsafe {
+					lum_pixels.free()
+					chr_pixels.free()
+					final_pixels.free()
+				}
 			}
 		}
 
