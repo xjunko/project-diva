@@ -19,6 +19,7 @@ pub fn read(path string) !&structs.IArchive {
 	mut br := io.BinaryReader.from_bytes(raw_bytes)
 
 	header := br.read_string(.length, 4)
+
 	match header {
 		basic_archive.get_header() {
 			mut ba := structs.BasicArchive{
@@ -47,6 +48,10 @@ pub fn read(path string) !&structs.IArchive {
 		else {
 			panic('[FARC] Unhandled archive type: ${header}')
 		}
+	}
+
+	unsafe {
+		header.free()
 	}
 
 	return error('[FARC] Failed to read archive')
