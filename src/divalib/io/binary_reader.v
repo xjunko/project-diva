@@ -186,7 +186,7 @@ pub fn (mut br BinaryReader) read_singles(big_endian bool, amount int) []f32 {
 pub fn BinaryReader.from_bytes(data []u8) &BinaryReader {
 	mut br := &BinaryReader{}
 
-	br.data = data
+	br.data = unsafe { data }
 	br.position = 0
 
 	return br
