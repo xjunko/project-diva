@@ -1,14 +1,12 @@
 module main
 
 import os
-import arrays
-import math
-import divalib.archives.farc
-import divalib.sprites
-import divalib.io
-import divalib.textures
-import divalib.thirdparty.bcdec
 import stbi
+import divalib.io
+import divalib.sprites
+import divalib.textures
+import divalib.archives.farc
+import divalib.thirdparty.bcdec
 
 fn init() {
 	stbi.set_flip_vertically_on_write(true)
