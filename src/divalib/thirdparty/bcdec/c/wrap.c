@@ -82,58 +82,67 @@ char* jnko_ati2(char* src, int w, int h) {
 
 char* jnko_decode_ycbcr(char* luminance, char* chroma, int w, int h,
                         int channels, int chroma_channels) {
-  // chroma is always half the size of luminance, so resize it to match
-  // luminance.
-  char* chroma_resized = (char*)malloc(w * h * chroma_channels);
-  char* final_pixels = (char*)malloc(w * h * 4);
+  char* final_pixels = (char*)malloc(w * h * 4 * sizeof(unsigned char));
 
-  stbir_resize_uint8_linear(chroma, w / 2, h / 2, 0, chroma_resized, w, h, 0,
-                            chroma_channels);
+  if (final_pixels == NULL) {
+    printf("[NATIVE] Failed to allocate memory for decoding ycbcr!\n");
+    return NULL;
+  }
 
-  // // copy chroma to final pixels
-  // // 2 channels to 4 channels
-  // for (int i = 0; i < w; i++) {
-  //   for (int j = 0; j < h; j++) {
-  //     final_pixels[(j * w + i) * 4] = chroma_resized[(j * w + i) * 2];
-  //     final_pixels[(j * w + i) * 4 + 1] = chroma_resized[(j * w + i) * 2];
-  //     final_pixels[(j * w + i) * 4 + 2] = chroma_resized[(j * w + i) * 2 +
-  //     1]; final_pixels[(j * w + i) * 4 + 3] = 255;
-  //   }
-  // }
+  for (int y = 0; y < h; ++y) {
+    for (int x = 0; x < w; ++x) {
+      unsigned char Y = (unsigned char)luminance[(y * w + x) * 2];
 
-  for (int i = 0; i < w; i++) {
-    for (int j = 0; j < h; j++) {
-      float* chroma_pixel =
-          (float*)(chroma_resized + (j * w + i) * chroma_channels);
+      int chroma_x = x / 2;
+      int chroma_y = y / 2;
 
-      float luminance_r =
-          ((char)(luminance[(j * w + i) * channels]) + 128.0f) / 255.0f;
-      float chroma_r =
-          ((char)(chroma_resized[(j * w + i) * 2]) + 128.0) / 255.0f;
-      float chroma_g =
-          ((char)(chroma_resized[(j * w + i) * 2 + 1]) + 128.0f) / 255.0f;
+      unsigned char Cb =
+          (unsigned char)chroma[(chroma_y * (w / 2) + chroma_x) * 2];
+      unsigned char Cr =
+          (unsigned char)chroma[(chroma_y * (w / 2) + chroma_x) * 2 + 1];
 
-      // printf("%f %f %f \n", luminance_r, chroma_r, chroma_g);
+      float R = Y + 1.402f * (Cr - 128);
+      float G = Y - 0.344136f * (Cb - 128) - 0.714136f * (Cr - 128);
+      float B = Y + 1.772f * (Cb - 128);
 
-      const float r =
-          MIN(1.0f, MAX(0.0f, luminance_r + 1.5748f * chroma_g)) * 255.0f;
-      const float g = MIN(1.0f, MAX(0.0f, luminance_r - 0.1873f * chroma_r -
-                                              0.4681f * chroma_g)) *
-                      255.0f;
-      const float b =
-          MIN(1.0f, MAX(0.0f, luminance_r + 1.8556f * chroma_r)) * 255.0f;
-      const float a =
-          MIN(1.0f, MAX(0.0f, ((char)(luminance[(j * w + i) * channels + 1]) +
-                               255.0f) /
-                                  255.0f)) *
-          255.0f;
-
-      final_pixels[(j * w + i) * 4 + 0] = r;
-      final_pixels[(j * w + i) * 4 + 1] = g;
-      final_pixels[(j * w + i) * 4 + 2] = b;
-      final_pixels[(j * w + i) * 4 + 3] = a;
+      final_pixels[(y * w + x) * 4 + 0] =
+          (unsigned char)fminf(fmaxf(R, 0), 255);
+      final_pixels[(y * w + x) * 4 + 1] =
+          (unsigned char)fminf(fmaxf(G, 0), 255);
+      final_pixels[(y * w + x) * 4 + 2] =
+          (unsigned char)fminf(fmaxf(B, 0), 255);
+      final_pixels[(y * w + x) * 4 + 3] =
+          (unsigned char)luminance[(y * w + x) * 2 + 1];
     }
   }
 
   return final_pixels;
 }
+
+// Alternative shorter version but resizes the chroma
+// char* jnko_decode_ycbcr(char* luminance, char* chroma, int w, int h,
+//                         int channels, int chroma_channels) {
+//   char* chroma_resized = (char*)malloc(w * h * chroma_channels);
+//   char* final_pixels = (char*)malloc(w * h * 4 * sizeof(float));
+
+//   stbir_resize_uint8_linear(chroma, w / 2, h / 2, 0, chroma_resized, w, h, 0,
+//                             chroma_channels);
+
+//   for (int i = 0; i < w * h; ++i) {
+//     unsigned char Y = (unsigned char)luminance[i * 2];
+
+//     unsigned char Cb = (unsigned char)chroma_resized[i * 2];
+//     unsigned char Cr = (unsigned char)chroma_resized[i * 2 + 1];
+
+//     float R = Y + 1.402f * (Cr - 128);
+//     float G = Y - 0.344136f * (Cb - 128) - 0.714136f * (Cr - 128);
+//     float B = Y + 1.772f * (Cb - 128);
+
+//     final_pixels[i * 4 + 0] = (unsigned char)fminf(fmaxf(R, 0), 255);
+//     final_pixels[i * 4 + 1] = (unsigned char)fminf(fmaxf(G, 0), 255);
+//     final_pixels[i * 4 + 2] = (unsigned char)fminf(fmaxf(B, 0), 255);
+//     final_pixels[i * 4 + 3] = (unsigned char)luminance[i * 2 + 1];
+//   }
+
+//   return final_pixels;
+// }
