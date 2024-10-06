@@ -71,7 +71,7 @@ pub fn (mut br BinaryReader) read_n(amount int) []u8 {
 		return []
 	}
 
-	mut data := br.data[br.position..br.position + amount]
+	mut data := unsafe { br.data[br.position..br.position + amount] }
 	br.position += amount
 
 	return data
@@ -110,7 +110,13 @@ pub fn (mut br BinaryReader) read_string(method BinaryReaderStringMethod, option
 				}
 			}
 
-			return data.bytestr()
+			mut data_str := data.bytestr()
+
+			unsafe {
+				data.free()
+			}
+
+			return data_str
 		}
 		.length {
 			if optional_length.len == 0 {
