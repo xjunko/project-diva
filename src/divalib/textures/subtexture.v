@@ -15,6 +15,7 @@ pub mut:
 pub fn (sub_texture &SubTexture) free() {
 	// Nothing to free, because data is just a reference to binaryreader upstream.
 	// Those will get freed instead.
+	// panic("Don't free SubTexture, refer to ${@FILE}:${@LINE}")
 }
 
 pub fn (mut sub_texture SubTexture) read(mut br io.BinaryReader) {
