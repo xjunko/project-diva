@@ -49,11 +49,12 @@ pub fn (mut sprite_set SpriteSet) read() {
 	}
 	// Sprite Info
 	{
+		sprite_set.sprites = []&Sprite{len: int(sprite_count), init: unsafe { nil }}
 		sprite_set.stream.to(sprite_offset)
 		for i := 0; i < sprite_count; i++ {
 			mut sprite := &Sprite{}
 			sprite.read(mut sprite_set.stream)
-			sprite_set.sprites << sprite
+			sprite_set.sprites[i] = sprite
 		}
 	}
 	// Texture Name
