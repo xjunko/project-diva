@@ -1,6 +1,7 @@
 module textures
 
 import divalib.io
+import divalib.thirdparty.bcdec
 
 pub struct Texture {
 pub mut:
@@ -42,16 +43,9 @@ pub fn (mut texture Texture) read(mut br io.BinaryReader) {
 		mip_map_count = u8(subtexture_count)
 	}
 
-	texture.subtextures = [][]&SubTexture{}
-
+	texture.subtextures = [][]&SubTexture{len: int(array_size), init: unsafe { nil }}
 	for i := 0; i < array_size; i++ {
-		mut row := []&SubTexture{}
-
-		for j := 0; j < mip_map_count; j++ {
-			row << &SubTexture{}
-		}
-
-		texture.subtextures << row
+		texture.subtextures[i] = []&SubTexture{len: int(mip_map_count), init: &SubTexture{}}
 	}
 
 	for i := 0; i < array_size; i++ {
@@ -63,4 +57,42 @@ pub fn (mut texture Texture) read(mut br io.BinaryReader) {
 	}
 
 	br.pop_offset()
+
+	for i := 0; i < array_size; i++ {
+		for j := 0; j < mip_map_count; j++ {
+			if texture.subtextures[i][j].format == TextureFormat.ati2 {
+				texture.process_unique_subtextures()
+				return
+			}
+		}
+	}
+}
+
+pub fn (mut texture Texture) process_unique_subtextures() {
+	assert texture.subtextures[0].len == 2
+	assert texture.subtextures[0][0].format == TextureFormat.ati2
+	assert texture.subtextures[0][1].format == TextureFormat.ati2
+	assert texture.subtextures[0][0].width / 2 == texture.subtextures[0][1].width
+	assert texture.subtextures[0][0].height / 2 == texture.subtextures[0][1].height
+
+	lum_pixels, lum_channel_count := texture.subtextures[0][0].decode()
+	chr_pixels, chr_channel_count := texture.subtextures[0][1].decode()
+
+	mut final_pixels := bcdec.get_ati2_ycbcr(lum_pixels, chr_pixels, texture.subtextures[0][0].width,
+		texture.subtextures[0][0].height, lum_channel_count, chr_channel_count)
+
+	mut rgba_texture := &SubTexture{
+		width:  texture.subtextures[0][0].width
+		height: texture.subtextures[0][0].height
+		format: TextureFormat.rgba8
+		data:   &final_pixels
+	}
+
+	texture.subtextures[0] = []&SubTexture{len: 1, init: unsafe { nil }}
+	texture.subtextures[0][0] = rgba_texture
+
+	unsafe {
+		lum_pixels.free()
+		chr_pixels.free()
+	}
 }
