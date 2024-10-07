@@ -38,33 +38,20 @@ fn main() {
 		sprite_set.read()
 
 		for mut texture in sprite_set.texture_set.textures {
-			supported := [textures.TextureFormat.ati2]
-
-			if texture.subtextures[0][0].format !in supported {
-				continue
-			}
-
 			println('Texture: ${texture.name}')
 			println('Format: ${texture.subtextures[0][0].format}')
 			println('Compressed: ${texture.subtextures[0][0].format.is_compressed()}')
 
 			for mut subtexture_row in texture.subtextures {
-				mut lum_texture := subtexture_row[0]
-				mut chr_texture := subtexture_row[1]
+				for n, mut subtexture in subtexture_row {
+					subtexture_data, subtexture_channels := subtexture.decode()
 
-				lum_pixels, lum_channel_count := lum_texture.decode()
-				chr_pixels, chr_channel_count := chr_texture.decode()
+					stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name + '_${n}.tga',
+						subtexture.width, subtexture.height, subtexture_channels, subtexture_data.data)!
 
-				final_pixels := bcdec.get_ati2_ycbcr(lum_pixels, chr_pixels, lum_texture.width,
-					lum_texture.height, lum_channel_count, chr_channel_count)
-
-				stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name + '.tga',
-					lum_texture.width, lum_texture.height, 4, final_pixels.data)!
-
-				unsafe {
-					lum_pixels.free()
-					chr_pixels.free()
-					final_pixels.free()
+					unsafe {
+						subtexture_data.free()
+					}
 				}
 			}
 		}
