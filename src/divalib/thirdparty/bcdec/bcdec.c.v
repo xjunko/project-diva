@@ -20,7 +20,7 @@ pub fn get_dxt1(src []u8, width int, height int) []u8 {
 	mut v_array := unsafe { arrays.carray_to_varray[u8](c_array, (width * height * 4)) }
 
 	unsafe {
-		free(v_array)
+		free(c_array)
 	}
 
 	return v_array
@@ -31,7 +31,7 @@ pub fn get_dxt3(src []u8, width int, height int) []u8 {
 	mut v_array := unsafe { arrays.carray_to_varray[u8](c_array, (width * height * 4)) }
 
 	unsafe {
-		free(v_array)
+		free(c_array)
 	}
 
 	return v_array
@@ -42,7 +42,7 @@ pub fn get_dxt5(src []u8, width int, height int) []u8 {
 	mut v_array := unsafe { arrays.carray_to_varray[u8](c_array, (width * height * 4)) }
 
 	unsafe {
-		free(v_array)
+		free(c_array)
 	}
 
 	return v_array
