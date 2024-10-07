@@ -39,8 +39,15 @@ pub fn (mut sub_texture SubTexture) decode() ([]u8, int) {
 	mut channel_count := 0
 
 	if !sub_texture.format.is_compressed() {
-		// This should be easy, so I'm leaving it for later
-		panic('Unimplemented uncompressed texture format')
+		match sub_texture.format {
+			.rgba8 {
+				channel_count = 4
+				return unsafe { sub_texture.data }, channel_count
+			}
+			else {
+				panic('Unsupported texture format: ${sub_texture.format}')
+			}
+		}
 	} else {
 		match sub_texture.format {
 			.dxt1 {
