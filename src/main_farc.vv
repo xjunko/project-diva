@@ -60,6 +60,4 @@ fn main() {
 	}
 
 	compressed_encrypted.free()
-
-	for {}
 }
