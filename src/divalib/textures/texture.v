@@ -58,6 +58,8 @@ pub fn (mut texture Texture) read(mut br io.BinaryReader) {
 
 	br.pop_offset()
 
+	// BC5 (ati2), has 2 mipmaps, one is luminance and the other is half-sized chroma
+	// this combines it into one RGBA8 texture
 	for i := 0; i < array_size; i++ {
 		for j := 0; j < mip_map_count; j++ {
 			if texture.subtextures[i][j].format == TextureFormat.ati2 {
@@ -81,6 +83,10 @@ pub fn (mut texture Texture) process_unique_subtextures() {
 	mut final_pixels := bcdec.get_ati2_ycbcr(lum_pixels, chr_pixels, texture.subtextures[0][0].width,
 		texture.subtextures[0][0].height, lum_channel_count, chr_channel_count)
 
+	unsafe {
+		lum_pixels.free()
+		chr_pixels.free()
+	}
 	mut rgba_texture := &SubTexture{
 		width:  texture.subtextures[0][0].width
 		height: texture.subtextures[0][0].height
@@ -90,9 +96,4 @@ pub fn (mut texture Texture) process_unique_subtextures() {
 
 	texture.subtextures[0] = []&SubTexture{len: 1, init: unsafe { nil }}
 	texture.subtextures[0][0] = rgba_texture
-
-	unsafe {
-		lum_pixels.free()
-		chr_pixels.free()
-	}
 }
