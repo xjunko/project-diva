@@ -33,3 +33,4 @@ bin/
 assets/*
 *.txt
 project_miku
+.unused
