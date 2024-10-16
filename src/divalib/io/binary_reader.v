@@ -192,6 +192,15 @@ pub fn BinaryReader.from_bytes(data []u8) &BinaryReader {
 	return br
 }
 
+pub fn BinaryReader.from_bytes_clone(data []u8) &BinaryReader {
+	mut br := &BinaryReader{}
+
+	br.data = data.clone()
+	br.position = 0
+
+	return br
+}
+
 pub fn BinaryReader.from_file(path string) !&BinaryReader {
 	raw_bytes := os.read_bytes(path)!
 	return BinaryReader.from_bytes(raw_bytes)
