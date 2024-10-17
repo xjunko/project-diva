@@ -6,7 +6,7 @@ import divalib.io
 import divalib.sprites
 import divalib.textures
 import divalib.archives.farc
-import divalib.thirdparty.bcdec
+import thirdparty.bcdec
 
 fn init() {
 	stbi.set_flip_vertically_on_write(true)

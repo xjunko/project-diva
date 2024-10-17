@@ -2,7 +2,7 @@ module textures
 
 import arrays
 import divalib.io
-import divalib.thirdparty.bcdec
+import thirdparty.bcdec
 
 pub struct SubTexture {
 pub mut:

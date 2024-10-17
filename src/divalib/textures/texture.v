@@ -1,7 +1,7 @@
 module textures
 
 import divalib.io
-import divalib.thirdparty.bcdec
+import thirdparty.bcdec
 
 pub struct Texture {
 pub mut:
