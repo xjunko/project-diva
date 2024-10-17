@@ -2,7 +2,7 @@ module divagame
 
 import os
 import sdl
-import nsauzede.vnk
+import thirdparty.vnk
 import framework.time.fps
 import divalib.archives.farc
 import divalib.archives.farc.structs
@@ -55,8 +55,6 @@ pub fn Application.create() &Application {
 
 	return app
 }
-
-fn C.nk_combo(voidptr, voidptr, int, int, int, C.nk_vec2) int
 
 pub fn run() {
 	mut application := Application.create()
