@@ -192,6 +192,15 @@ pub fn BinaryReader.from_bytes(data []u8) &BinaryReader {
 	return br
 }
 
+pub fn BinaryReader.from_bytes_mut(mut data []u8) &BinaryReader {
+	mut br := &BinaryReader{}
+
+	br.data = unsafe { mut data }
+	br.position = 0
+
+	return br
+}
+
 pub fn BinaryReader.from_bytes_clone(data []u8) &BinaryReader {
 	mut br := &BinaryReader{}
 
