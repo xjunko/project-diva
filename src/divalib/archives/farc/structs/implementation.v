@@ -33,6 +33,8 @@ pub fn (fa FutureArchive) get_header() string {
 }
 
 // Extract
+
+@[manualfree]
 pub fn (mut ba BasicArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 	alignment := br.read_u32(true)
@@ -60,6 +62,7 @@ pub fn (mut ba BasicArchive) read(mut br io.BinaryReader) ! {
 	ba.align = alignment
 }
 
+@[manualfree]
 pub fn (mut ca CompressedArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 	alignment := br.read_u32(true)
@@ -99,6 +102,7 @@ mut:
 	decrypt_blocks(mut dst []u8, src []u8)
 }
 
+@[manualfree]
 pub fn (mut fa FutureArchive) create_aes_from_iv(iv []u8) FutureToneDecryptor {
 	// vfmt off
 	mut aes_ft := aes.new_cipher([
@@ -113,6 +117,7 @@ pub fn (mut fa FutureArchive) create_aes_from_iv(iv []u8) FutureToneDecryptor {
 	return cbc_ft
 }
 
+@[manualfree]
 pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 	header_size := br.read_u32(true)
 
@@ -124,8 +129,6 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 	mut alignment := br.read_u32(true)
 	mut is_ft := is_encrypted && (alignment & (alignment - 1)) != 0
 
-	mut original_data := br.data.clone()
-
 	if is_ft {
 		br.position = 0x10
 		iv := br.read_n(0x10)
@@ -134,29 +137,31 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 		mut cbc_ft := fa.create_aes_from_iv(iv)
 		mut dsc := []u8{len: br.data.len}
 		cbc_ft.decrypt_blocks(mut dsc, br.data)
-		br.data = dsc
+
+		mut decrypted_br := io.BinaryReader.from_bytes(dsc)
+		decrypted_br.position = br.position
 		// vfmt on
 
-		alignment = br.read_u32(true)
-		is_ft = br.read_u32(true) != 0
+		alignment = decrypted_br.read_u32(true)
+		is_ft = decrypted_br.read_u32(true) != 0
 
-		mut entry_count := br.read_u32(true)
+		mut entry_count := decrypted_br.read_u32(true)
 
 		if is_ft {
-			padding = br.read_u32(true)
+			padding = decrypted_br.read_u32(true)
 		}
 
-		for (br.position < header_size + 0x08) {
-			name := br.read_string(.null_terminated)
-			offset := br.read_u32(true)
-			compressed_size := br.read_u32(true)
-			decompressed_size := br.read_u32(true)
+		for (decrypted_br.position < header_size + 0x08) {
+			name := decrypted_br.read_string(.null_terminated)
+			offset := decrypted_br.read_u32(true)
+			compressed_size := decrypted_br.read_u32(true)
+			decompressed_size := decrypted_br.read_u32(true)
 
 			mut entry_is_encrypted := false
 			mut entry_is_compressed := false
 
 			if is_ft {
-				entry_flags := br.read_u32(true)
+				entry_flags := decrypted_br.read_u32(true)
 				entry_is_compressed = (entry_flags & 2) != 0
 				entry_is_encrypted = (entry_flags & 4) != 0
 			}
@@ -173,29 +178,30 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 				fixed_size = decompressed_size
 			}
 
-			fixed_size = math.min[u32](fixed_size, u32(br.data.len - offset))
+			fixed_size = math.min[u32](fixed_size, u32(decrypted_br.data.len - offset))
 
 			$if debug {
-				println('Position: ${br.position} | Offset: ${offset} | Length: ${f32(fixed_size) / 1e+6}mb')
+				println('Position: ${decrypted_br.position} | Offset: ${offset} | Length: ${f32(fixed_size) / 1e+6}mb')
 			}
 
 			// Skip raw data, we'll decrypt it later
-			br.position += fixed_size
+			decrypted_br.position += fixed_size
 
 			// Decrypt entry
 			// Requires original data to decrypt
-			mut binary_file_reader := io.BinaryReader.from_bytes(original_data)
+			br.push_offset()
+			br.position = 0x00
 			mut data := []u8{}
 
 			if is_ft {
 				if entry_is_encrypted {
-					binary_file_reader.position = offset
-					entry_iv := binary_file_reader.read_n(16)
+					br.position = offset
+					entry_iv := br.read_n(16)
 
 					mut entry_cbc := fa.create_aes_from_iv(entry_iv)
 
-					data = []u8{len: binary_file_reader.data.len - binary_file_reader.position}
-					entry_cbc.decrypt_blocks(mut data, binary_file_reader.data[binary_file_reader.position..])
+					data = []u8{len: br.data.len - br.position}
+					entry_cbc.decrypt_blocks(mut data, br.data[br.position..])
 				}
 
 				if entry_is_compressed {
@@ -208,6 +214,11 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 				unsafe {
 					data = data[..decompressed_size]
 				}
+			}
+
+			// Dont need the original decrypted data
+			unsafe {
+				decrypted_br.free()
 			}
 
 			$if debug {
