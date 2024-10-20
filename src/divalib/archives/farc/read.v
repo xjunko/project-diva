@@ -20,6 +20,12 @@ pub fn read(path string) !&structs.IArchive {
 
 	header := br.read_string(.length, 4)
 
+	defer {
+		unsafe {
+			header.free()
+		}
+	}
+
 	match header {
 		basic_archive.get_header() {
 			mut ba := structs.BasicArchive{
@@ -48,10 +54,6 @@ pub fn read(path string) !&structs.IArchive {
 		else {
 			panic('[FARC] Unhandled archive type: ${header}')
 		}
-	}
-
-	unsafe {
-		header.free()
 	}
 
 	return error('[FARC] Failed to read archive')
