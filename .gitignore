@@ -34,3 +34,4 @@ assets/*
 *.txt
 project_miku
 .unused
+*.zst
