@@ -174,7 +174,7 @@ pub fn (mut br BinaryReader) read_u64(big_endian bool) u64 {
 }
 
 // Unique types
-pub fn (mut br BinaryReader) read_offset() int {
+pub fn (mut br BinaryReader) read_offset() u32 {
 	return br.read_u32(false) // TOOD: For some cases, we need to use big_endian, so add some check or whatever.
 }
 
