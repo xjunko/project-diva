@@ -20,11 +20,8 @@ pub mut:
 }
 
 pub fn (mut camera Camera) read(mut br io.BinaryReader) {
-	println('1')
 	camera.eye_x.read(mut br)
-	println('2')
 	camera.eye_y.read(mut br)
-	println('3')
 	camera.eye_z.read(mut br)
 	camera.position_x.read(mut br)
 	camera.position_y.read(mut br)
