@@ -1,7 +1,6 @@
 module pv
 
 import os
-import divalib.database.pv.structs
 
 pub struct DBParser {
 pub mut:
@@ -10,8 +9,8 @@ pub mut:
 
 pub struct DBEntry {
 pub mut:
-	song         structs.Song
-	difficulties map[string]structs.Difficulty
+	song         Song
+	difficulties map[string]Difficulty
 }
 
 pub fn DBParser.from_pvdb(path string) !DBParser {
@@ -19,8 +18,8 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 
 	mut lines := os.read_lines(path)!
 
-	mut current_song := structs.Song{}
-	mut current_difficulties := map[string]structs.Difficulty{}
+	mut current_song := Song{}
+	mut current_difficulties := map[string]Difficulty{}
 
 	mut last_id := -1
 
@@ -45,8 +44,8 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 
 			println('[PVDB] [${current_song.id}] - ${current_song.japanese.name}')
 
-			current_song = structs.Song{}
-			current_difficulties = map[string]structs.Difficulty{}
+			current_song = Song{}
+			current_difficulties = map[string]Difficulty{}
 		}
 
 		last_id = song_id
@@ -138,7 +137,7 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 			difficulty_index := items[1] + '_' + items[2]
 
 			if difficulty_index !in current_difficulties {
-				current_difficulties[difficulty_index] = structs.Difficulty{}
+				current_difficulties[difficulty_index] = Difficulty{}
 			}
 
 			match items[3] {

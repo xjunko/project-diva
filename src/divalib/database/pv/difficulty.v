@@ -1,4 +1,4 @@
-module structs
+module pv
 
 pub struct Difficulty {
 pub mut:
