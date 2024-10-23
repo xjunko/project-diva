@@ -2,6 +2,7 @@ module io
 
 import os
 import math.bits
+import math.vec
 import encoding.binary
 
 pub struct BinaryReader {
@@ -35,10 +36,15 @@ pub type BinaryReaderCallback = fn ()
 pub fn (mut br BinaryReader) read_offset_and(callback &BinaryReaderCallback) {
 	offset := br.read_u32(false)
 
-	if offset == 0 {
+	if offset <= 0 {
+		println('[BinaryReader]: read_offset_and: Invalid offset = ${offset}')
 		return
 	}
 
+	br.read_at_offset_and(offset, callback)
+}
+
+pub fn (mut br BinaryReader) read_at_offset_and(offset int, callback &BinaryReaderCallback) {
 	mut current := br.position
 	br.to(br.get_base_offset() + offset)
 	callback()
@@ -168,6 +174,10 @@ pub fn (mut br BinaryReader) read_u64(big_endian bool) u64 {
 }
 
 // Unique types
+pub fn (mut br BinaryReader) read_offset() int {
+	return br.read_u32(false) // TOOD: For some cases, we need to use big_endian, so add some check or whatever.
+}
+
 pub fn (mut br BinaryReader) read_single(big_endian bool) f32 {
 	return bits.f32_from_bits(br.read_u32(big_endian))
 }
@@ -180,6 +190,33 @@ pub fn (mut br BinaryReader) read_singles(big_endian bool, amount int) []f32 {
 	}
 
 	return data
+}
+
+pub enum VectorBinaryFormat {
+	single
+	half
+	u8
+	u16
+}
+
+pub fn (mut br BinaryReader) read_vector4(format VectorBinaryFormat) vec.Vec4[f32] {
+	match format {
+		.single {
+			panic('UNIMPLEMENTED')
+		}
+		.half {
+			panic('UNIMPLEMENTED')
+		}
+		.u8 {
+			return vec.vec4[f32](f32(br.read_u8()) / 255, f32(br.read_u8()) / 255, f32(br.read_u8()) / 255,
+				f32(br.read_u8()) / 255)
+		}
+		.u16 {
+			panic('UNIMPLEMENTED')
+		}
+	}
+
+	panic('UNIMPLEMENTED')
 }
 
 // Factory
