@@ -12,18 +12,27 @@ fn init() {
 }
 
 fn audio_archives() ! {
-	// vgmstream-wrapper
-	mut sfx_test := io.VAGReader.from_file('assets/dev/sfx/se_ft_common_01.vag')
-	sfx_test.read()!
+	// // vgmstream-wrapper
+	// mut sfx_test := io.VAGReader.from_file('assets/dev/sfx/se_ft_common_01.vag')
+	// sfx_test.read()!
 
 	// Audio SFX (vag format)
-	mut sfx_archive := farc.read('assets/dev/se_ft.farc')!
+	mut sfx_archive := farc.read('assets/dev/farcs/button.farc')!
 
+	//
+	mut audio := (sfx_archive.get_file('01_button1.vag')!).to_vag_audio()
+	audio.read()!
+	os.write_file_array('assets/dev/sfx/' + 'test' + '.wav', audio.data)!
+
+	// To WAV
 	for file in sfx_archive.entries {
 		println('[SFX] Extracting ${file.name}')
-		os.write_file_array('assets/dev/sfx/' + file.name, file.data)!
+		mut wav := io.VAGReader.from_bytes(file.data)
+		wav.read()!
+		os.write_file_array('assets/dev/sfx/' + file.name + '.wav', wav.data)!
 		file.free()
 	}
+
 	sfx_archive.free()
 }
 
@@ -78,5 +87,6 @@ pub fn aet_test() ! {
 }
 
 pub fn run() ! {
-	farc_archives()!
+	// farc_archives()!
+	audio_archives()!
 }
