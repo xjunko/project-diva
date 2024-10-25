@@ -42,7 +42,11 @@ pub fn (mut sub_texture SubTexture) decode() ([]u8, int) {
 		match sub_texture.format {
 			.rgba8 {
 				channel_count = 4
-				return unsafe { sub_texture.data }, channel_count
+				return unsafe { sub_texture.data.clone() }, channel_count
+			}
+			.rgb8 {
+				channel_count = 3
+				return unsafe { sub_texture.data.clone() }, channel_count
 			}
 			else {
 				panic('Unsupported texture format: ${sub_texture.format}')
