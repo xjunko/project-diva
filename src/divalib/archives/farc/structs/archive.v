@@ -2,6 +2,7 @@ module structs
 
 import divalib.io
 
+@[heap]
 pub struct ArchiveEntry {
 pub mut:
 	name              string
@@ -35,6 +36,7 @@ mut:
 	align   u32
 	entries []ArchiveEntry
 
+	get_file(string) !&ArchiveEntry
 	get_header() string
 	free()
 }
