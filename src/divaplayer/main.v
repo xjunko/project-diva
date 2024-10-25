@@ -7,6 +7,7 @@ import gx
 import sync
 import bass
 import divalib.scripts.dsc
+import divalib.scripts.dsc.opcodes
 import divalib.database.pv
 import divagame.framework.time.fps
 import divagame.framework.time.counter
@@ -24,8 +25,9 @@ mut:
 	current_script dsc.DSCParser
 	current_audio  &bass.Track = unsafe { nil }
 
-	current_time  f32
-	current_lyric string
+	current_time          f32
+	current_lyric         string
+	current_pv_performers string
 
 	current_lock &sync.Mutex = sync.new_mutex()
 }
@@ -38,6 +40,7 @@ pub fn (mut application Application) init(_ voidptr) {
 		panic(err)
 	}
 	application.current_pv = application.pvs.entries[261]
+	application.current_pv_performers = application.current_pv.song.performers.filter(it.character != 'NUL').map(it.character).join(', ')
 	application.current_script = dsc.DSCParser.from_file(os.join_path(diva_root, application.current_pv.difficulties['hard_0'].script.path)) or {
 		panic(err)
 	}
@@ -52,7 +55,7 @@ pub fn (mut application Application) init(_ voidptr) {
 		mut limiter := fps.Limiter.create(120)
 		mut thread_time := counter.TimeCounter{}
 
-		thread_time.reset(offset: 5000)
+		thread_time.reset(offset: 1000)
 
 		for {
 			thread_time.tick()
@@ -63,35 +66,35 @@ pub fn (mut application Application) init(_ voidptr) {
 
 	go fn [mut application] () {
 		mut limiter := fps.Limiter.create(60)
+		mut index := 0
 
-		mut current_line := 0
-		mut current_time := 0.0
-		mut current_offset := 1000.0
+		mut hit := bass.new_sample('${@VMODROOT}/assets/sfx/hit.wav')
+		hit.set_volume(0.5)
 
 		for {
-			for i := current_line; i < application.current_script.commands.len; i++ {
-				current_command := &application.current_script.commands[i]
-
-				if current_command.action == 'TIME' {
-					new_time := dsc.DSCParser.diva_time_to_standard_milliseconds(current_command.arguments[0])
-
-					if application.current_time >= new_time {
-						current_time = new_time
-						current_line = i
-					} else {
-						current_time = new_time
-						current_line = i
-
-						break
+			for i := index; i < application.current_script.commands.len; i++ {
+				if application.current_time >= application.current_script.commands[i].end_time {
+					index = i + 1
+					match application.current_script.commands[i].action {
+						'LYRIC' {
+							application.current_lock.lock()
+							application.current_lyric = application.current_pv.song.lyrics[application.current_script.commands[i].values[0]]
+							application.current_lock.unlock()
+						}
+						'TARGET' {
+							hit.play()
+							continue
+						}
+						'MUSIC_PLAY' {
+							println('[DivaPlayer] Playing music!')
+							application.current_audio.play()
+							continue
+						}
+						else {}
 					}
 				}
-
-				if current_command.action == 'LYRIC' {
-					application.current_lock.lock()
-					application.current_lyric = application.current_pv.song.lyrics[int(current_command.arguments[0])]
-					application.current_lock.unlock()
-				}
 			}
+
 			limiter.sync()
 		}
 	}()
@@ -103,7 +106,7 @@ pub fn (mut application Application) pv_info() {
 	application.ctx.draw_text(8, 8, 'Title: ${application.current_pv.song.japanese.name}',
 		color: gx.white
 	)
-	application.ctx.draw_text(8, 24, 'Performers: ${application.current_pv.song.performers.filter(it.character != 'NUL').map(it.character).join(', ')}',
+	application.ctx.draw_text(8, 24, 'Performers: ${application.current_pv_performers}',
 		color: gx.white
 	)
 	application.ctx.draw_text(8, 42, 'Time: ${application.current_time:.2f}',
@@ -124,11 +127,6 @@ pub fn (mut application Application) pv_info() {
 }
 
 pub fn (mut application Application) update(time_ms f32) {
-	if time_ms >= 0 && !application.current_audio.playing {
-		println('[Application] Starting audio!')
-		application.current_audio.play()
-	}
-
 	application.current_time = time_ms
 }
 
