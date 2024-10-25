@@ -12,7 +12,7 @@ pub mut:
 
 	japanese   SongInfo
 	english    SongInfo
-	performers [6]SongPerformer // there's 6 performers at most, increase this if needed
+	performers []SongPerformer = []SongPerformer{len: 6} // there's 6 performers at most, increase this if needed
 	lyrics     map[int]string
 }
 
