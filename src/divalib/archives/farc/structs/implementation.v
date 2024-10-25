@@ -217,11 +217,6 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 				}
 			}
 
-			// Dont need the original decrypted data
-			unsafe {
-				decrypted_br.free()
-			}
-
 			$if debug {
 				println('[FutureArchive]: Entry | Name=${name} | Offset=${offset} | Compressed=${f32(compressed_size) / 1e+6}mb | Decompressed=${f32(decompressed_size) / 1e+6}mb | FixedSize=${f32(fixed_size) / 1e+6}mb')
 			}
@@ -245,6 +240,11 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 			if (is_ft && entry_count == 0) || padding == 0xF00BA {
 				break
 			}
+		}
+
+		// Dont need the original decrypted data
+		unsafe {
+			decrypted_br.free()
 		}
 	}
 }
