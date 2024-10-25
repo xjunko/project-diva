@@ -1,3 +1,5 @@
+// Based from
+// https://github.com/blueskythlikesclouds/MikuMikuLibrary/blob/master/MikuMikuLibrary/IO/Common/EndianBinaryReader.cs
 module io
 
 import os
@@ -22,6 +24,10 @@ pub fn (br &BinaryReader) free() {
 }
 
 // Offset
+pub fn (mut br BinaryReader) get_offset() int {
+	return br.position - br.get_base_offset()
+}
+
 pub fn (mut br BinaryReader) get_base_offset() int {
 	if br.offsets.len == 0 {
 		return 0
@@ -37,14 +43,17 @@ pub fn (mut br BinaryReader) read_offset_and(callback &BinaryReaderCallback) {
 	offset := br.read_u32(false)
 
 	if offset <= 0 {
-		println('[BinaryReader]: read_offset_and: Invalid offset = ${offset}')
 		return
 	}
 
-	br.read_at_offset_and(offset, callback)
+	br.read_at_offset_and(offset, unsafe { callback })
 }
 
 pub fn (mut br BinaryReader) read_at_offset_and(offset int, callback &BinaryReaderCallback) {
+	if offset <= 0 {
+		return
+	}
+
 	mut current := br.position
 	br.to(br.get_base_offset() + offset)
 	callback()
@@ -94,6 +103,15 @@ pub enum BinaryReaderStringMethod {
 
 pub fn (mut br BinaryReader) read_string_offset(method BinaryReaderStringMethod, optional_length ...int) string {
 	offset := br.read_u32(false)
+	{
+		// mut data := []string{len: 1}
+
+		// br.read_at_offset_and(offset, fn [mut br, mut data, method, optional_length] () {
+		// 	data[0] = br.read_string(method, ...optional_length)
+		// })
+
+		// return data[0]
+	}
 	mut current := br.position
 	br.position = offset
 	mut data := br.read_string(method, ...optional_length)
