@@ -5,6 +5,10 @@ import gg
 import gx
 import sync
 import bass
+import stbi
+import divalib.io
+import divalib.aets
+import divalib.sprites
 import divalib.scripts.dsc
 import divalib.database.pv
 import divalib.archives.farc
@@ -23,13 +27,17 @@ mut:
 
 	pvs pv.DBParser
 
-	current_pv     pv.DBEntry
+	current_pv          pv.DBEntry
+	current_pv_sel_farc &structs.IArchive = unsafe { nil }
+
 	current_script dsc.DSCParser
 	current_audio  &bass.Track = unsafe { nil }
 
 	current_time          f32
 	current_lyric         string
 	current_pv_performers string
+
+	current_pv_background gg.Image
 
 	current_lock &sync.Mutex = sync.new_mutex()
 }
@@ -49,6 +57,43 @@ pub fn (mut application Application) init(_ voidptr) {
 	application.current_script = dsc.DSCParser.from_file(os.join_path(diva_root, application.current_pv.difficulties['hard_0'].script.path)) or {
 		panic(err)
 	}
+
+	mut current_pv_sel_farc := farc.read(os.join_path(diva_root, 'rom', '2d', 'spr_sel_pv${application.current_pv.song.id}.farc')) or {
+		panic(err)
+	}
+
+	for entry in current_pv_sel_farc.entries {
+		mut stream := io.BinaryReader.from_bytes(entry.data)
+		mut sprite_set := sprites.SpriteSet.from_io(stream)
+		sprite_set.read()
+
+		for mut texture in sprite_set.texture_set.textures {
+			if texture.name.starts_with('MERGE_D5COMP_0') {
+				for mut subtexture_row in texture.subtextures {
+					for _, mut subtexture in subtexture_row {
+						subtexture_data, subtexture_channels := subtexture.decode()
+
+						tmp_path := 'assets/dev/subtextures/' + texture.name +
+							'_${subtexture.format}_.tga'
+						stbi.stbi_write_tga(tmp_path, subtexture.width, subtexture.height,
+							subtexture_channels, subtexture_data.data) or { panic(err) }
+
+						application.current_pv_background = application.ctx.create_image(tmp_path) or {
+							panic(err)
+						}
+					}
+
+					for subtexture in subtexture_row {
+						unsafe {
+							subtexture.free()
+						}
+					}
+				}
+			}
+		}
+		sprite_set.free()
+	}
+	current_pv_sel_farc.free()
 
 	// Current PV setup
 	current_pv_audio := os.join_path(diva_root, application.current_pv.song.audio_path)
@@ -143,6 +188,8 @@ pub fn (mut application Application) frame(_ voidptr) {
 	application.ctx.begin()
 
 	application.pv_info()
+	application.ctx.draw_image(0, 0, application.current_pv_background.width, application.current_pv_background.height,
+		application.current_pv_background)
 
 	application.ctx.end()
 }
