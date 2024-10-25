@@ -138,7 +138,8 @@ pub fn (mut fa FutureArchive) read(mut br io.BinaryReader) ! {
 		mut dsc := []u8{len: br.data.len}
 		cbc_ft.decrypt_blocks(mut dsc, br.data)
 
-		mut decrypted_br := io.BinaryReader.from_bytes(dsc)
+		mut decrypted_br := io.BinaryReader.from_bytes([]u8{})
+		decrypted_br.data = unsafe { dsc }
 		decrypted_br.position = br.position
 		// vfmt on
 
