@@ -1,14 +1,14 @@
 module divaplayer
 
 import os
-import time
 import gg
 import gx
 import sync
 import bass
 import divalib.scripts.dsc
-import divalib.scripts.dsc.opcodes
 import divalib.database.pv
+import divalib.archives.farc
+import divalib.archives.farc.structs
 import divagame.framework.time.fps
 import divagame.framework.time.counter
 
@@ -18,6 +18,8 @@ const diva_root = '/mnt/Second/Games/PDAFT/SBZV_7.01/'
 pub struct Application {
 mut:
 	ctx &gg.Context = unsafe { nil }
+
+	sfx &structs.IArchive = unsafe { nil }
 
 	pvs pv.DBParser
 
@@ -34,6 +36,9 @@ mut:
 
 pub fn (mut application Application) init(_ voidptr) {
 	bass.start()
+
+	// Internal
+	application.sfx = farc.read('assets/dev/farcs/button.farc') or { panic(err) }
 
 	// PV
 	application.pvs = pv.DBParser.from_pvdb(os.join_path(diva_root, 'rom/pv_db.txt')) or {
@@ -68,8 +73,12 @@ pub fn (mut application Application) init(_ voidptr) {
 		mut limiter := fps.Limiter.create(60)
 		mut index := 0
 
-		mut hit := bass.new_sample('${@VMODROOT}/assets/sfx/hit.wav')
-		hit.set_volume(0.5)
+		// Audio
+		mut hit_reader := (application.sfx.get_file('01_button1.vag') or { panic(err) }).to_vag_audio()
+		hit_reader.read() or { panic(err) }
+
+		mut hit := bass.new_sample_from_bytes(hit_reader.data)
+		hit.set_volume(0.3)
 
 		for {
 			for i := index; i < application.current_script.commands.len; i++ {
