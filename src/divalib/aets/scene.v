@@ -17,6 +17,8 @@ pub mut:
 
 	camera       &Camera = unsafe { nil }
 	compositions []&Composition
+	videos       []&Video
+	audios       []&Audio
 }
 
 pub fn (mut scene Scene) read(mut br io.BinaryReader) {
@@ -50,6 +52,26 @@ pub fn (mut scene Scene) read(mut br io.BinaryReader) {
 		for i := 0; i < composition_count; i++ {
 			scene.compositions[i] = &Composition{}
 			scene.compositions[i].read(mut br)
+		}
+	})
+
+	// Video
+	br.read_at_offset_and(videos_offset, fn [mut scene, mut br, video_count] () {
+		scene.videos = []&Video{len: int(video_count), init: unsafe { nil }}
+
+		for i := 0; i < video_count; i++ {
+			scene.videos[i] = &Video{}
+			scene.videos[i].read(mut br)
+		}
+	})
+
+	// Audio
+	br.read_at_offset_and(audio_offset, fn [mut scene, mut br, audio_count] () {
+		scene.audios = []&Audio{len: int(audio_count), init: unsafe { nil }}
+
+		for i := 0; i < audio_count; i++ {
+			scene.audios[i] = &Audio{}
+			scene.audios[i].read(mut br)
 		}
 	})
 }
