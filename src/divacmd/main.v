@@ -3,10 +3,9 @@ module divacmd
 import os
 import stbi
 import divalib.io
+import divalib.aets
 import divalib.sprites
-import divalib.textures
 import divalib.archives.farc
-import thirdparty.bcdec
 
 fn init() {
 	stbi.set_flip_vertically_on_write(true)
@@ -28,14 +27,18 @@ fn audio_archives() ! {
 	sfx_archive.free()
 }
 
-pub fn run() ! {
+fn farc_archives() ! {
 	// Sprites (bc formats)
-	mut compressed_encrypted := farc.read('assets/dev/farcs/spr_gam_cmn.farc')!
+	mut compressed_encrypted := farc.read('assets/dev/taion/spr_gam_pv261.farc')!
 
 	for entry in compressed_encrypted.entries {
 		mut stream := io.BinaryReader.from_bytes(entry.data)
 		mut sprite_set := sprites.SpriteSet.from_io(stream)
 		sprite_set.read()
+
+		for sprite in sprite_set.sprites {
+			println(sprite)
+		}
 
 		for mut texture in sprite_set.texture_set.textures {
 			println('Texture: ${texture.name}')
@@ -46,11 +49,18 @@ pub fn run() ! {
 				for n, mut subtexture in subtexture_row {
 					subtexture_data, subtexture_channels := subtexture.decode()
 
-					stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name + '_${n}.tga',
-						subtexture.width, subtexture.height, subtexture_channels, subtexture_data.data)!
+					stbi.stbi_write_tga('assets/dev/subtextures/' + texture.name +
+						'_${subtexture.format}_${n}.tga', subtexture.width, subtexture.height,
+						subtexture_channels, subtexture_data.data)!
 
 					unsafe {
 						subtexture_data.free()
+					}
+				}
+
+				for subtexture in subtexture_row {
+					unsafe {
+						subtexture.free()
 					}
 				}
 			}
@@ -60,4 +70,13 @@ pub fn run() ! {
 	}
 
 	compressed_encrypted.free()
+}
+
+pub fn aet_test() ! {
+	mut aet_sets := aets.AetSet.from_file('assets/dev/aet_gam_pv221.bin')!
+	aet_sets.read()
+}
+
+pub fn run() ! {
+	farc_archives()!
 }
