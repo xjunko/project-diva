@@ -17,6 +17,10 @@ pub fn (mut aet_set AetSet) read() {
 	for aet_set.stream.position < aet_set.stream.data.len {
 		offset := aet_set.stream.read_offset()
 
+		if offset == 0 {
+			return
+		}
+
 		aet_set.stream.read_at_offset_and(offset, fn [mut aet_set] () {
 			mut scene := &Scene{}
 			scene.read(mut aet_set.stream)
