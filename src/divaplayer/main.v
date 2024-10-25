@@ -187,9 +187,9 @@ pub fn (mut application Application) update(time_ms f32) {
 pub fn (mut application Application) frame(_ voidptr) {
 	application.ctx.begin()
 
-	application.pv_info()
 	application.ctx.draw_image(0, 0, application.current_pv_background.width, application.current_pv_background.height,
 		application.current_pv_background)
+	application.pv_info()
 
 	application.ctx.end()
 }
