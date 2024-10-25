@@ -107,7 +107,9 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 		if key.starts_with('lyric.') {
 			lyric_index := key.split_n('.', 2)[1].int()
 			current_song.lyrics[lyric_index] = value
+			unhandled = false
 		}
+
 		if key.starts_with('performer') {
 			items := key.split_n('.', 3)
 
@@ -126,6 +128,8 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 				}
 				else {}
 			}
+
+			unhandled = false
 		}
 		if key.starts_with('difficulty') {
 			items := key.split_n('.', 4)
@@ -157,6 +161,12 @@ pub fn DBParser.from_pvdb(path string) !DBParser {
 				attribute_key := items[3].split_nth('.', 2)[1]
 				current_difficulties[difficulty_index].script.attributes[attribute_key] = value
 			}
+
+			unhandled = false
+		}
+
+		if unhandled {
+			println('[PVDB] Unhandled key: ${key}')
 		}
 	}
 
