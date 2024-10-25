@@ -18,7 +18,9 @@ pub fn (mut curve FCurve) read(mut br io.BinaryReader) {
 	count := br.read_u32(false)
 	curve.keys = []Key{len: int(count)}
 
-	br.read_offset_and(fn [mut curve, mut br, count] () {
+	offset := br.read_offset()
+
+	br.read_at_offset_and(offset, fn [mut curve, mut br, count] () {
 		if count == 1 {
 			curve.keys[0].value = br.read_single(false)
 			return
